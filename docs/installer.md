@@ -53,8 +53,11 @@ keeps `profile/`. Saves carry over both ways: 1.4.3 converts a 1.2.1 save on loa
    `totk.exe --prepare-shaders`) in the install folder, then fold the shader cache's loose files (four per shader, about
    117,000) into `shader-cache/shader-cache.pack` (`tools/pack_shader_cache.py`). totk.exe reads the pack first and
    writes the translations it makes in play as loose files; running the tool again with the game closed folds those in.
-   The patches are written twice: `romfs-patches` and `romfs-patches-xbox` (`--xbox-prompts`, the A/B and X/Y prompts
-   swapped for `pad_layout = xbox_prompts`).
+   The patches are written once per overlay folder: `romfs-patches`, `romfs-patches-xbox` (`--xbox-prompts`, the A/B and
+   X/Y prompts swapped for `pad_layout = xbox_prompts`) and, on 1.4.3 only, the six wide `romfs-patches-<w>x<h>` of the
+   21:9 and 32:9 game resolutions the settings menu offers (`--aspect`, `installer/steps.py WIDE_SIZES`). Each holds a
+   full copy of the layout archive, so every wide size costs the setup another run of the tool and its own folder in the
+   install.
 6. **Clean up** the temp folder (generated C and objects, about 1.3 GB).
 
 A cancelled or failed setup resumes from the last finished step (`totk-install.json`).

@@ -6,8 +6,8 @@ tools/prepare_shaders.py, whose output goes to <temp>/logs/<step>-<tool>.log and
 here: the host check is a small C program built with the bundled clang (hostcheck.c).
 
 Install folder: exefs/, romfs/ (romfs.bin, index.json), profile/, totk.exe and its DLLs, romfs-index.bin,
-romfs-patches/, romfs-patches-xbox/, totk_xlate.exe, the shader state of totk.exe --prepare-shaders, totk.ini,
-totk-install.json.
+romfs-patches/, romfs-patches-<w>x<h>/ (the wide game resolutions of WIDE_SIZES), romfs-patches-xbox/, totk_xlate.exe,
+the shader state of totk.exe --prepare-shaders, totk.ini, totk-install.json.
 Temp folder (<temp>/<dest name>-<hash>): check/ (ExeFS of both inputs, the host check), gen/ (C), build/ (objects),
 logs/ (kept by the cleanup).
 """
@@ -582,7 +582,9 @@ class Compile(Step):
 TRANSLATED = re.compile(r'gfx_shader: prepare: (\d+) of (\d+) pairs')
 
 
-WIDE_SIZES = ('2560x1080', '3440x1440', '3840x1600', '5120x2160')   # runtime/ui/menu.cpp row_output_res
+WIDE_SIZES = ('2560x1080', '3440x1440', '3840x1600', '5120x2160',   # the 21:9 panels
+              '3840x1080', '5120x1440')                              # the 32:9 ones
+# runtime/ui/menu.cpp row_output_res lists the same sizes; tools/ultrawide_layout.py lays the UI out for any of them.
 
 
 class Prepare(Step):
@@ -593,7 +595,8 @@ class Prepare(Step):
         xlate_id = layout.xlate.with_suffix('.id')
         tools = [layout.tools / n for n in ('prepare_shaders.py', 'shader_census.py', 'make_romfs_patches.py',
                                             'pack_shader_cache.py', 'ultrawide_layout.py')]
-        return fingerprint('prepare-1', ctx.keys['compile'], layout.xlate, xlate_id, shader_list_text(layout), *tools)
+        return fingerprint('prepare-1', ctx.keys['compile'], layout.xlate, xlate_id, shader_list_text(layout), *tools,
+                           *WIDE_SIZES)   # the list decides which wide overlays the step writes
 
     def current(self, ctx, record):
         dest = ctx.dest
@@ -622,9 +625,10 @@ class Prepare(Step):
                               dest / 'romfs-patches'])
         if code:
             raise InstallError('prepare.romfs_patches_failed', code=code, log=str(log))
-        # The same overlay with the UI laid out for the 21:9 game resolutions the settings menu offers (runtime/romfs.c
-        # overlay_init picks the one that matches). Only 1.4.3 has the camera aspect patch (recomp/patches-v143.txt) the
-        # layouts go with, and ultrawide_layout.py is checked against 1.4.3's layout archive: 1.2.1 builds none.
+        # The same overlay with the UI laid out for the 21:9 and 32:9 game resolutions the settings menu offers
+        # (runtime/romfs.c overlay_init picks the one that matches). Only 1.4.3 has the camera aspect patch
+        # (recomp/patches-v143.txt) the layouts go with, and ultrawide_layout.py is checked against 1.4.3's layout
+        # archive: 1.2.1 builds none.
         for size in WIDE_SIZES:
             remove(dest / f'romfs-patches-{size}')
             if version_tag(game_version(ctx)) != 'v143':

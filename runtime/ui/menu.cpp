@@ -383,9 +383,11 @@ static void list_gpus(VkInstance inst) {
     g_gpu_n = (int)n;
 }
 
-// Window sizes: the common 16:9 sizes that fit the monitor, the 1920x1080 default and the current size.
-static const int kSizes[][2] = {{1280, 720}, {1366, 768}, {1600, 900}, {1920, 1080}, {2560, 1440}, {3200, 1800},
-                                {3840, 2160}};
+// Window sizes: the common 16:9 sizes that fit the monitor and the 21:9 and 32:9 sizes an ultrawide one matches, the
+// 1920x1080 default and the current size. By area, because row_window_size puts the current size where its area fits;
+// a size wider or taller than the monitor is left out, so an ultrawide entry only shows on the screens it fits.
+static const int kSizes[][2] = {{1280, 720}, {1366, 768}, {1600, 900}, {1920, 1080}, {2560, 1080}, {2560, 1440},
+                                {3840, 1080}, {3440, 1440}, {3200, 1800}, {5120, 1440}, {3840, 2160}};
 enum { MAX_SIZES = sizeof kSizes / sizeof *kSizes + 1 };
 
 static void row_window_size(void) {
@@ -417,19 +419,23 @@ static void row_window_size(void) {
     opt_choice_list("TOTK_WINDOW_SIZE", UI_MENU_WINDOW_SIZE, pv, pn, n, UI_MENU_WINDOW_SIZE_DESC);
 }
 
-// The game resolution (resolution.c): 16:9 sizes from its smallest, 1280x720 (for weak GPUs), up, the common 21:9
-// monitor sizes (the camera and the HUD follow a wider shape, resolution.c res_init), and the current value when it is
-// another size.
+// The game resolution (resolution.c): 16:9 sizes from its smallest, 1280x720 (for weak GPUs), up, then the wide sizes
+// the setup prepares a HUD layout for (installer/steps.py WIDE_SIZES): the camera takes the output's shape and the HUD
+// moves to the screen's corners (res_init). Each is shown under the name a monitor's spec gives its shape, so an
+// ultrawide user finds their own size in the list; the current value is added when it is another size.
 static void row_output_res(void) {
     static const char *const vals[] = {"1280x720", "1600x900", "1920x1080", "2560x1440", "3200x1800", "3840x2160",
-                                       "2560x1080", "3440x1440", "3840x1600", "5120x2160"};
+                                       "2560x1080", "3440x1440", "3840x1600", "5120x2160", "3840x1080", "5120x1440"};
+    static const char *const shapes[] = {"16:9", "16:9", "16:9", "16:9", "16:9", "16:9",
+                                         "21:9", "21:9", "21:9", "21:9", "32:9", "32:9"};
     enum { N = sizeof vals / sizeof *vals };
+    static_assert(sizeof shapes / sizeof *shapes == N, "a game resolution with no shape name");
     char shown[N][32];
     const char *names[N];
     for (int i = 0; i < N; i++) {
         int w = 0, h = 0;
         sscanf(vals[i], "%dx%d", &w, &h);
-        snprintf(shown[i], sizeof shown[i], "%d × %d", w, h);   // U+00D7, the multiplication sign
+        snprintf(shown[i], sizeof shown[i], "%d × %d (%s)", w, h, shapes[i]);   // U+00D7, the multiplication sign
         names[i] = shown[i];
     }
     opt_choice_list("TOTK_OUTPUT_RES", UI_MENU_OUTPUT_RES, vals, names, N, UI_MENU_OUTPUT_RES_DESC);

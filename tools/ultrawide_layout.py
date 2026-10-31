@@ -1,15 +1,17 @@
 # Adapted from MacNativeGames games/totk/scripts/ultrawide_layout.py @ 933b6a0 (MIT, Copyright (c) 2026
 # MacNativeGames contributors). Used by tools/make_romfs_patches.py --aspect.
-"""The game's UI layouts for a canvas wider than 16:9 (output_res = 3440x1440 in totk.ini), edited in place in the
-decompressed UI/LayoutArchive/Common.Product.*.blarc (tools/make_romfs_patches.py --aspect).
+"""The game's UI layouts for a canvas wider than 16:9 (output_res = 3440x1440 on a 21:9 monitor, 5120x1440 on a 32:9
+one), edited in place in the decompressed UI/LayoutArchive/Common.Product.*.blarc (tools/make_romfs_patches.py --aspect).
 
 The game lays its UI out on a 1920x1080 grid and maps that grid onto the canvas, so on a 21:9 canvas every layout comes
-out 34% too wide. Here each layout's root pane is narrowed to 16:9 (scale x = 16/9 over the aspect), backgrounds that
-must cover the whole screen are widened back, and the HUD's parts move out to the screen's corners. The pane list and
-the distances are the ones the community TOTK-Ultrawide mod for emulators found for 1.0.0 .. 1.2.1 (GPL; only those
-values are taken, no code; THIRD_PARTY_NOTICES.md). This is an independent implementation, checked against 1.4.3's
-Common.Product.140: every pane is found by name and every pane field and animation key holds the value the edit
-expects before it is written.
+out 34% too wide and on a 32:9 canvas twice as wide. Here each layout's root pane is narrowed by that much (scale x =
+16/9 over the aspect), backgrounds that must cover the whole screen are widened back, and the HUD's parts move out to
+the screen's corners. Every distance is a multiple of how far the canvas reaches past a 16:9 layout, so one table
+serves any shape wider than 16:9; tests/ultrawide_layout_test.py checks that on the 21:9 and 32:9 sizes the setup
+prepares (installer/steps.py WIDE_SIZES). The pane list and the distances are the ones the community TOTK-Ultrawide mod
+for emulators found for 1.0.0 .. 1.2.1 (GPL; only those values are taken, no code; THIRD_PARTY_NOTICES.md). This is an
+independent implementation, checked against 1.4.3's Common.Product.140: every pane is found by name and every pane
+field and animation key holds the value the edit expects before it is written.
 """
 import struct
 

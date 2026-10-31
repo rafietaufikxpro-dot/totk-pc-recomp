@@ -92,6 +92,10 @@ From the repository root, in PowerShell. Every step that depends on the game ver
    For Xbox button prompts, run `make_romfs_patches.py` once more with `--xbox-prompts`: it writes
    `build\<ver>\romfs-patches-xbox` ([controls.md](controls.md), "Xbox button prompts"); `build_game.py` copies it next
    to `totk.exe` like `romfs-patches`.
+   For a game resolution wider than 16:9, run it once per size with `--aspect <w>x<h>`: it writes
+   `build\<ver>\romfs-patches-<w>x<h>`, the same overlay with the UI laid out for that shape. The installer builds the
+   six sizes of `installer/steps.py WIDE_SIZES` (21:9 and 32:9); a source build makes none until you ask, and the game
+   logs which one it looked for.
 
 6. Prepare the shaders (once per build folder and translator). It needs `refs\MacNativeGames` (`tools\fetch_refs.sh`)
    for the shared shader list:
@@ -140,6 +144,9 @@ change passes these, all run with `.venv`:
 | `tests\flags_check.py` | the function-local flag helpers of `runtime\cpu.h` against its packed ones | no |
 | `tests\excl_mt.py` | the exclusive monitor helpers under contention and ABA, on several threads | no |
 | `tests\jumptables_check.py` | `recomp/jumptables.py` against a Unicorn oracle; must report 0 disagreements, on 1.4.3 too | yes |
+
+`tools\ultrawide_layout.py`, the UI layout for a game resolution wider than 16:9, is checked on a synthetic layout
+archive at the 21:9 and 32:9 sizes: `python tests\ultrawide_layout_test.py`, stdlib only, no game files.
 
 Runtime probes, each a mode of `totk.exe` (the list is at the top of `runtime/main.c`): `--probe-kernel`,
 `--probe-vkexec`, `--probe-nvn-tex` and `--probe-shader` cover most runtime changes.

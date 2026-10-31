@@ -11,9 +11,10 @@ captured at once (upstream checked weapon, shield, material and ability wheel at
 The game-over flow fix of the same upstream script is 1.0.0 only (1.2.1 and 1.4.3 run DmF_SY_GameOver.110) and is
 left out.
 
---aspect <w>x<h> (a game resolution wider than 16:9, such as 3440x1440) also lays the UI out for that shape
-(tools/ultrawide_layout.py): menus stay 16:9 in the middle, full-screen backgrounds cover the width and the HUD moves
-to the screen's corners. totk.exe loads that overlay from romfs-patches-<w>x<h> when the game resolution is that size
+--aspect <w>x<h> (a game resolution wider than 16:9, such as 3440x1440 on a 21:9 monitor or 5120x1440 on a 32:9 one)
+also lays the UI out for that shape (tools/ultrawide_layout.py): menus stay 16:9 in the middle, full-screen backgrounds
+cover the width and the HUD moves to the screen's corners. totk.exe loads that overlay from romfs-patches-<w>x<h> when
+the game resolution is that size
 (runtime/romfs.c overlay_init); the camera's side of it is the patch set aspect (recomp/patches-v143.txt).
 
 --xbox-prompts: the same overlay with the A and B, and the X and Y button prompts swapped, for pad_layout = xbox_prompts

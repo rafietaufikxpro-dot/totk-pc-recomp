@@ -90,9 +90,11 @@ def main():
             copy(build / f, out / f)
         else:
             print(f'package_build: {f} not in {build}, skipped')
-    n = copy_tree(build / 'romfs-patches', out / 'romfs-patches')
-    if (build / 'romfs-patches-xbox').is_dir():   # pad_layout = xbox_prompts (make_romfs_patches.py --xbox-prompts)
-        n += copy_tree(build / 'romfs-patches-xbox', out / 'romfs-patches-xbox')
+    # Every RomFS overlay the game can load: romfs-patches, romfs-patches-xbox (pad_layout = xbox_prompts) and the
+    # romfs-patches-<w>x<h> of a game resolution wider than 16:9 (make_romfs_patches.py --aspect).
+    n = 0
+    for src in sorted(p for p in build.glob('romfs-patches*') if (p / 'manifest.tsv').is_file()):
+        n += copy_tree(src, out / src.name)
     n += copy_tree(exefs, out / 'exefs')
     n += copy_tree(fonts, out / 'shared-fonts')
     if not a.no_shader_cache and (build / 'shader-cache').is_dir():

@@ -174,12 +174,14 @@ def write_if_changed(path, text):
 def copy_romfs_patches(version, out):
     """totk.exe loads romfs-patches beside romfs-index.bin (runtime/romfs.c overlay_init). tools/make_romfs_patches.py
     writes them into build/<version> only, so a build in another directory ran without the 60 fps overlay (the quick
-    menus' captured background turned black). Copies them when their manifest differs; romfs-patches-xbox (the same with
-    the A/B and X/Y prompts swapped, pad_layout = xbox_prompts) the same way when it was made."""
-    for name in ('romfs-patches', 'romfs-patches-xbox'):
-        src = ROOT / 'build' / version / name
-        dst = out / name
-        if src.resolve() == dst.resolve() or not (src / 'manifest.tsv').is_file():
+    menus' captured background turned black). Copies every overlay folder made there when its manifest differs:
+    romfs-patches, romfs-patches-xbox (the same with the A/B and X/Y prompts swapped, pad_layout = xbox_prompts) and the
+    romfs-patches-<w>x<h> the UI layout for a wide game resolution needs (--aspect)."""
+    for src in sorted((ROOT / 'build' / version).glob('romfs-patches*')):
+        if not (src / 'manifest.tsv').is_file():
+            continue
+        name, dst = src.name, out / src.name
+        if src.resolve() == dst.resolve():
             continue
         if (dst / 'manifest.tsv').is_file() and (dst / 'manifest.tsv').read_bytes() == (src / 'manifest.tsv').read_bytes():
             continue
